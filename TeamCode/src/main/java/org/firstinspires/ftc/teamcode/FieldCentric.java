@@ -11,7 +11,6 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp
-@Disabled
 public class FieldCentric extends LinearOpMode {
 
     // This variable determines whether the following program

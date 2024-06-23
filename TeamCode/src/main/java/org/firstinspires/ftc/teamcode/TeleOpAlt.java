@@ -20,7 +20,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp
 @Config
-@Disabled
 public class TeleOpAlt extends LinearOpMode {
     public static double kP = 0.05;
     public static double kD = 0;
