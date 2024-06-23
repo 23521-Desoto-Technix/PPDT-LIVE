@@ -12,13 +12,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp
 @Disabled
-public class Teleop extends LinearOpMode {
+public class FieldCentric extends LinearOpMode {
 
     // This variable determines whether the following program
     // uses field-centric or robot-centric driving styles. The
     // differences between them can be read here in the docs:
     // https://docs.ftclib.org/ftclib/features/drivebases#control-scheme
-    static final boolean FIELD_CENTRIC = false;
+    static final boolean FIELD_CENTRIC = true;
 
     @Override
     public void runOpMode() throws InterruptedException {
