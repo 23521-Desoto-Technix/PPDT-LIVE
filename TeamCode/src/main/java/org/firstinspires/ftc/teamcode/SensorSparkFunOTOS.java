@@ -95,7 +95,11 @@ public class SensorSparkFunOTOS extends LinearOpMode {
         // clockwise (negative rotation) from the robot's orientation, the offset
         // would be {-5, 10, -90}. These can be any value, even the angle can be
         // tweaked slightly to compensate for imperfect mounting (eg. 1.3 degrees).
+<<<<<<< HEAD
         Pose2d offset = new Pose2d(-0.157480315, 5.70866142, 0);
+=======
+        Pose2d offset = new Pose2d(0, 0, 0);
+>>>>>>> 5c196f01d8c1472413310e383447215688409ba4
         myOtos.setOffset(offset);
 
         // Here we can set the linear and angular scalars, which can compensate for
