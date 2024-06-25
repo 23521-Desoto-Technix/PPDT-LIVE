@@ -105,7 +105,7 @@ public class FieldCentric extends LinearOpMode {
             if (gamepad1.a) {
                 imu.resetYaw();
             }
-
+            telemetry.addLine("Press A to reset the gyro");
         }
     }
 
