@@ -17,7 +17,7 @@ public class FieldCentric extends LinearOpMode {
     // uses field-centric or robot-centric driving styles. The
     // differences between them can be read here in the docs:
     // https://docs.ftclib.org/ftclib/features/drivebases#control-scheme
-    static final boolean FIELD_CENTRIC = true;
+    static boolean FIELD_CENTRIC = true;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -105,7 +105,15 @@ public class FieldCentric extends LinearOpMode {
             if (gamepad1.a) {
                 imu.resetYaw();
             }
+
+            if (gamepad1.left_trigger > 0.5) {
+                FIELD_CENTRIC = false;
+            } else-if (gamepad1.right_trigger > 0.5) {
+                FIELD_CENTRIC = true;
+            }
             telemetry.addLine("Press A to reset the gyro");
+            telemetry.addLine("Press left trigger to switch to robot centric");
+            telemetry.addLine("Press right trigger to switch to field centric");
         }
     }
 
