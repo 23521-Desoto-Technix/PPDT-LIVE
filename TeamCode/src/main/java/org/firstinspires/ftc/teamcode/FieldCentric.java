@@ -41,6 +41,7 @@ public class FieldCentric extends LinearOpMode {
         imu.initialize(new IMU.Parameters(orientationOnRobot));
 
         waitForStart();
+        imu.resetYaw();
 
         while (!isStopRequested()) {
 
