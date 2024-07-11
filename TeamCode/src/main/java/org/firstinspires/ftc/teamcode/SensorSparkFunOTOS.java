@@ -7,10 +7,16 @@ package org.firstinspires.ftc.teamcode;
 
 import android.annotation.SuppressLint;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Vector2d;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 /*
  * This OpMode illustrates how to use the SparkFun Qwiic Optical Tracking Odometry Sensor (OTOS)
@@ -31,12 +37,32 @@ public class SensorSparkFunOTOS extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         // Get a reference to the sensor
         myOtos = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
+        Pose2d beginPose = new Pose2d(0, 0, 0);
+        MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
 
         // All the configuration for the OTOS is done in this helper method, check it out!
         configureOtos();
 
         // Wait for the start button to be pressed
         waitForStart();
+        Drawing drawing = new Drawing();
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
+        DcMotor backLeftMotor = hardwareMap.dcMotor.get("backLeft");
+        DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRight");
+        DcMotor backRightMotor = hardwareMap.dcMotor.get("backRight");
+
+        // Reverse the right side motors. This may be wrong for your setup.
+        // If your robot moves backwards when commanded to go forwards,
+        // reverse the left side instead.
+        // See the note about this earlier on this page.
+        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Loop until the OpMode ends
         while (opModeIsActive()) {
@@ -47,6 +73,7 @@ public class SensorSparkFunOTOS extends LinearOpMode {
             // Reset the tracking if the user requests it
             if (gamepad1.y) {
                 myOtos.resetTracking();
+                drive.pose = new Pose2d(0,0,0);
             }
 
             // Re-calibrate the IMU if the user requests it
@@ -66,6 +93,28 @@ public class SensorSparkFunOTOS extends LinearOpMode {
 
             // Update the telemetry on the driver station
             telemetry.update();
+            drive.updatePoseEstimate();
+            TelemetryPacket packet = new TelemetryPacket();
+            drawing.drawRobot(packet.fieldOverlay(), new Pose2d(-pos.position.y, -pos.position.x,pos.heading.toDouble()), "blue");
+            drawing.drawRobot(packet.fieldOverlay(), drive.pose, "red");;
+            dashboard.sendTelemetryPacket(packet);
+            double y = -gamepad1.left_stick_y / 2; // Remember, Y stick value is reversed
+            double x = gamepad1.left_stick_x * 1.1 / 2; // Counteract imperfect strafing
+            double rx = gamepad1.right_stick_x / 2;
+
+            // Denominator is the largest motor power (absolute value) or 1
+            // This ensures all the powers maintain the same ratio,
+            // but only if at least one is out of the range [-1, 1]
+            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+            double frontLeftPower = (y + x + rx) / denominator;
+            double backLeftPower = (y - x + rx) / denominator;
+            double frontRightPower = (y - x - rx) / denominator;
+            double backRightPower = (y + x - rx) / denominator;
+
+            frontLeftMotor.setPower(frontLeftPower);
+            backLeftMotor.setPower(backLeftPower);
+            frontRightMotor.setPower(frontRightPower);
+            backRightMotor.setPower(backRightPower);
         }
     }
 
@@ -95,7 +144,7 @@ public class SensorSparkFunOTOS extends LinearOpMode {
         // clockwise (negative rotation) from the robot's orientation, the offset
         // would be {-5, 10, -90}. These can be any value, even the angle can be
         // tweaked slightly to compensate for imperfect mounting (eg. 1.3 degrees).
-        Pose2d offset = new Pose2d(-0.157480315, 5.70866142, 0);
+        Pose2d offset = new Pose2d(-0.157480315, 2.63779142, 0);
         myOtos.setOffset(offset);
 
         // Here we can set the linear and angular scalars, which can compensate for
@@ -114,8 +163,8 @@ public class SensorSparkFunOTOS extends LinearOpMode {
         // multiple speeds to get an average, then set the linear scalar to the
         // inverse of the error. For example, if you move the robot 100 inches and
         // the sensor reports 103 inches, set the linear scalar to 100/103 = 0.971
-        myOtos.setLinearScalar(1.0);
-        myOtos.setAngularScalar(1.0);
+        myOtos.setLinearScalar(1.211631664);
+        myOtos.setAngularScalar(0.99102535736);
 
         // The IMU on the OTOS includes a gyroscope and accelerometer, which could
         // have an offset. Note that as of firmware version 1.0, the calibration
@@ -144,6 +193,7 @@ public class SensorSparkFunOTOS extends LinearOpMode {
         SparkFunOTOS.Version hwVersion = new SparkFunOTOS.Version();
         SparkFunOTOS.Version fwVersion = new SparkFunOTOS.Version();
         myOtos.getVersionInfo(hwVersion, fwVersion);
+        myOtos.setAngularUnit(SparkFunOTOS.AngularUnit.RADIANS);
 
         telemetry.addLine("OTOS configured! Press start to get position data!");
         telemetry.addLine();

@@ -343,10 +343,10 @@ public final class MecanumDrive {
             drawPoseHistory(c);
 
             c.setStroke("#4CAF50");
-            Drawing.drawRobot(c, txWorldTarget.value());
+            Drawing.drawRobot(c, txWorldTarget.value(), "blue");
 
             c.setStroke("#3F51B5");
-            Drawing.drawRobot(c, pose);
+            Drawing.drawRobot(c, pose, "blue");
 
             c.setStroke("#4CAF50FF");
             c.setStrokeWidth(1);
